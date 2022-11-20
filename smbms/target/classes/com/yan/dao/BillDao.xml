@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yan.dao.BillDao">
+
+    <!--查询订单列表-->
+    <select id="showBillList" parameterType="map" resultMap="billProMap">
+        select * from smbms_bill b left join smbms_provider p on b.providerId=p.id
+        <where>
+            <if test="queryProductName!=''">
+                and productName like %#{queryProductName}%
+            </if>
+            <if test="queryProviderId!=0">
+                and providerId = #{queryProviderId}
+            </if>
+            <if test="queryIsPayment!=0">
+                and isPayment = #{queryIsPayment}
+            </if>
+        </where>
+    </select>
+    <resultMap id="billProMap" type="bill">
+        <result property="providerName" column="proName"/>
+    </resultMap>
+
+    <!--查询供应商-->
+    <select id="showProList" resultType="pro">
+        select *
+        from smbms_provider
+    </select>
+
+    <!--订单添加-->
+    <insert id="addBill" parameterType="bill">
+        insert into smbms_bill(billCode, , productName, productUnit, productCount, totalPrice, providerId, isPayment)
+        values (#{billCode}, #{productName}, #{productUnit}, #{productCount}, #{totalPrice}, #{providerId},
+                #{isPayment})
+    </insert>
+
+    <!--订单查看-->
+    <select id="billInfo" parameterType="_int" resultMap="billProMap">
+        select *
+        from smbms_bill b
+                 left join smbms_provider p on b.providerId = p.id
+        where b.id = #{bid}
+    </select>
+
+    <!--订单删除-->
+    <delete id="delBill" parameterType="_int">
+        delete
+        from smbms_bill
+        where id = #{bid}
+    </delete>
+
+    <!--订单删检查-->
+    <select id="delCheck" parameterType="_int" resultType="bill">
+        select id
+        from smbms_bill
+        where id = #{bid}
+    </select>
+
+    <!--订单修改-->
+    <update id="upBill" parameterType="bill">
+        update smbms_bill
+        <set>
+            <if test="billCode!=null">
+                <if test="billCode!=''">
+                    billCode = #{billCode},
+                </if>
+            </if>
+            <if test="productName!=null">
+                <if test="productName!=''">
+                    productName = #{productName},
+                </if>
+            </if>
+            <if test="productUnit!=null">
+                <if test="productUnit!=''">
+                    productUnit = #{productUnit},
+                </if>
+            </if>
+            <if test="productCount!=null">
+                <if test="productCount!=''">
+                    productCount = #{productCount},
+                </if>
+            </if>
+            <if test="totalPrice!=null">
+                <if test="totalPrice!=''">
+                    totalPrice = #{totalPrice},
+                </if>
+            </if>
+            <if test="providerId!=null">
+                <if test="providerId!=''">
+                    providerId = #{providerId},
+                </if>
+            </if>
+            <if test="isPayment!=null">
+                <if test="isPayment!=''">
+                    isPayment = #{isPayment},
+                </if>
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+</mapper>
