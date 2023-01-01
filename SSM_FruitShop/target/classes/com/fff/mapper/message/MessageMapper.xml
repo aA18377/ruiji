@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fff.mapper.message.MessageMapper">
+
+
+    <!-- 1  11 111111          11               -->
+    <!--万能搜索sql-->
+    <select id="selectPageBySql" resultType="com.fff.pojo.Message">
+        ${sql}
+    </select>
+
+    <!--查询所有-->
+    <select id="findAll" resultType="com.fff.pojo.Message">
+        select * from message
+    </select>
+
+    <!--实例插入-->
+    <insert id="insertByEntry" parameterType="com.fff.pojo.Message">
+        insert into message(name, phone, content) values (#{name},#{phone},#{content})
+    </insert>
+</mapper>

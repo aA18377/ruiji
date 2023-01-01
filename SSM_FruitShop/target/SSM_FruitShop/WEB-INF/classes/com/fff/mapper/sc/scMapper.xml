@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fff.mapper.sc.scMapper">
+    <resultMap id="real_fied" type="com.fff.pojo.Sc">
+        <result column="user_id" property="userId"/>
+        <result column="item_id" property="itemId"/>
+        <association property="item" column="item_id" select="select_item"/>
+    </resultMap>
+    <resultMap id="realFied" type="com.fff.pojo.Item">
+        <result property="id" javaType="_long" jdbcType="NUMERIC" column="id"/>
+        <result property="categoryIdOne" javaType="_long" column="category_id_one"/>
+        <result property="categoryIdTwo" javaType="_long" column="category_id_two"/>
+    </resultMap>
+
+    <select id="select_item" resultType="com.fff.pojo.Item">
+        select * from item where id = #{item_id}
+    </select>
+
+    <!--所有收藏-->
+    <select id="findAll" resultMap="real_fied">
+        select * from sc
+    </select>
+
+    <!--id删除收藏-->
+    <delete id="deleteById" >
+        delete from sc where id = #{id}
+    </delete>
+
+    <!--收藏+1-->
+    <update id="scAdd" parameterType="com.fff.pojo.Item">
+        update item
+        set scNum = #{scNum}
+        where id = #{id}
+    </update>
+
+    <!--id查询单个名字-->
+    <select id="findOneByIdForItem" resultMap="realFied">
+        select *
+        from item
+        where id = #{id}
+    </select>
+
+    <!--增加收藏-->
+    <insert id="insertByEntry" parameterType="com.fff.pojo.Sc">
+        insert into sc(item_id, user_id) values (#{itemId},#{userId})
+    </insert>
+
+    <select id="selectByCategory_id_two" resultMap="realFied" parameterType="_int">
+        select * from item where id = #{id}
+    </select>
+
+    <!--查询单个收藏品-->
+    <select id="findOneById" resultMap="real_fied">
+        select * from sc where item_id = #{id}
+    </select>
+
+    <!--查询单个收藏是否重复-->
+    <select id="findItemForRepeat" resultMap="real_fied">
+        select * from sc where item_id = #{itemId}
+        and user_id = #{userId}
+    </select>
+</mapper>

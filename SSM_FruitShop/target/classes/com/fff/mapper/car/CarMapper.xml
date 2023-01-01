@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fff.mapper.car.CarMapper">
+    <resultMap id="real_fied" type="com.fff.pojo.Car">
+        <result property="itemId" column="item_id"/>
+        <result property="userId" column="user_id"/>
+        <association property="item" column="item_id" select="selectItem"/>
+    </resultMap>
+    <select id="selectItem" resultType="com.fff.pojo.Item">
+        select * from item where id = #{item_id}
+    </select>
+
+
+
+    <insert id="addCar" parameterType="com.fff.pojo.Car">
+        insert into car(item_id, num,price,user_id)
+        values (#{itemId},#{num},#{price},#{userId})
+    </insert>
+
+    <select id="itemPrice" resultType="_double" parameterType="_long">
+        select price from item where id = #{itemId}
+    </select>
+
+    <!--查询所有-->
+    <select id="findAll" resultMap="real_fied">
+        select * from car
+    </select>
+
+    <!--id删除-->
+    <delete id="deleteById">
+        delete from car where id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fff.mapper.login.uLoginMapper">
+    <resultMap id="navMap" type="com.fff.pojo.NavItemCategory">
+
+
+        <association property="father" column="id" select="yiji"/>
+        <collection property="childrens" column="id" select="erji"/>
+
+    </resultMap>
+        <select id="yiji" resultType="com.fff.pojo.ItemCategory">
+            select * from item_category where isDelete = 0 and id = #{id}
+        </select>
+        <select id="erji" resultType="com.fff.pojo.ItemCategory">
+            select * from item_category where isDelete = 0 and pid = #{id}
+        </select>
+
+
+    <!--导航栏类目-->
+    <select id="navList" resultMap="navMap">
+        select * from item_category where isDelete = 0 and pid is null
+    </select>
+
+    <!--查询登录用户-->
+    <select id="selectOneByEntry" resultType="com.fff.pojo.User" parameterType="com.fff.pojo.User">
+        select * from user where userName = #{userName} and passWord = #{passWord}
+    </select>
+
+    <!--折扣商品-->
+    <select id="zkItemList" resultType="com.fff.pojo.Item">
+        select * from item where zk != 0
+    </select>
+
+    <!--热门商品-->
+    <select id="fireItemList" resultType="com.fff.pojo.Item">
+        select id,name,price,url1 from item where gmNum &gt;= 5 and scNum &gt;= 10
+    </select>
+
+    <!--添加新用户-->
+    <insert id="addNewUser" parameterType="com.fff.pojo.User">
+        insert into user(userName, passWord, phone, email) values
+        (#{userName}, #{passWord}, #{phone}, #{email})
+    </insert>
+</mapper>

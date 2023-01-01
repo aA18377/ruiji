@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fff.mapper.item.ItemMapper">
+    <!--               resultMap    -->
+    <resultMap id="realFied" type="com.fff.pojo.Item">
+        <result property="id" javaType="_long" jdbcType="NUMERIC" column="id"/>
+        <result property="categoryIdOne" javaType="_long" column="category_id_one"/>
+        <result property="categoryIdTwo" javaType="_long" column="category_id_two"/>
+        <association property="yiji" column="category_id_one" javaType="com.fff.pojo.ItemCategory"
+                     select="find_map_itemgory_yiji"/>
+        <association property="erji" column="category_id_two" javaType="com.fff.pojo.ItemCategory"
+                     select="find_map_itemgory_erji"/>
+        <collection property="pls" column="id" select="find_comment"/>
+    </resultMap>
+
+    <select id="find_comment" resultType="com.fff.pojo.Comment">
+        select *
+        from comment
+        where item_id = #{id}
+    </select>
+
+    <select id="find_map_itemgory_yiji" resultType="com.fff.pojo.ItemCategory">
+        select *
+        from item_category
+        where id = #{categoryIdOne}
+    </select>
+
+    <select id="find_map_itemgory_erji" resultType="com.fff.pojo.ItemCategory" parameterType="_int">
+        select *
+        from item_category
+        where id = #{categoryIdTwo}
+    </select>
+
+
+    <!--              片段               -->
+    <sql id="find_all">
+        select *
+        from item
+        where isDelete = 0
+    </sql>
+
+
+
+
+
+    <sql id="set_fied">
+        <if test="name!=null">
+            name = #{name},
+        </if>
+        <if test="price != null">
+            price = #{price},
+        </if>
+        <if test="scNum > 0">
+            scNum = #{scNum},
+        </if>
+        <if test="gmNum > 0">
+            gmNum = #{gmNum},
+        </if>
+        <if test="url1 != null">
+            url1 = #{url1},
+        </if>
+        <if test="url2 != null">
+            url2 = #{url2},
+        </if>
+        <if test="url3 != null">
+            url3 = #{url3},
+        </if>
+        <if test="url4 != null">
+            url4 = #{url4},
+        </if>
+        <if test="url5 != null">
+            url5 = #{url5},
+        </if>
+        <if test="ms != null">
+            ms = #{ms},
+        </if>
+        <if test="pam1 != null">
+            pam1 = #{pam1},
+        </if>
+        <if test="pam2 != null">
+            pam2 = #{pam2},
+        </if>
+        <if test="pam3 != null">
+            pam3 = #{pam3},
+        </if>
+        <if test="val3 != null">
+            val3 = #{val3},
+        </if>
+        <if test="val2 != null">
+            val2 = #{val2},
+        </if>
+        <if test="val1 != null">
+            val1 = #{val1},
+        </if>
+        <if test="type > 0">
+            type = #{type},
+        </if>
+        <if test="zk > 0">
+            zk = #{zk},
+        </if>
+        <if test="categoryIdOne > 0">
+            category_id_one = #{categoryIdOne},
+        </if>
+        <if test="categoryIdTwo > 0">
+            category_id_two = #{categoryIdTwo},
+        </if>
+    </sql>
+
+
+    <sql id="insert_fied">
+        values(#{name},#{price},0,0,#{url1},#{url2},#{url3},#{url4},#{url5},#{ms},#{pam1},#{pam2},#{pam3},#{val3},#{val2},#{val1},#{type},
+            #{zk},#{categoryIdOne},#{categoryIdTwo},0)
+    </sql>
+    <!--万能查询sql-->
+    <select id="selectPageBySql" resultMap="realFied">
+        ${sql}
+    </select>
+
+    <!--万能修改sql-->
+    <update id="updateBysql">
+        ${sql}
+    </update>
+
+    <!--展示所有商品-->
+    <select id="findAll" resultMap="realFied">
+        <include refid="find_all"/>
+    </select>
+
+    <!--添加商品-->
+    <insert id="insertByEntry" parameterType="com.fff.pojo.Item">
+        insert into item(name, price, scNum, gmNum, url1, url2, url3, url4, url5, ms, pam1, pam2, pam3, val3, val2,
+        val1, type, zk, category_id_one, category_id_two, isDelete)
+        <include refid="insert_fied"/>
+    </insert>
+
+    <!--查询类别-->
+    <select id="selectTypes" resultType="com.fff.pojo.ItemCategory">
+        select id, name
+        from item_category
+        where isDelete = 0
+          and pid is null
+    </select>
+
+    <!--下架商品-->
+    <update id="deleteById" parameterType="_int">
+        update item
+        set isDelete = 1
+        where id = #{id}
+    </update>
+
+    <!--修改商品-->
+    <update id="updateByEntry" parameterType="com.fff.pojo.Item">
+        update item
+        <set>
+            <include refid="set_fied"/>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--id查询单个名字-->
+    <select id="findOneById" resultMap="realFied">
+        select *
+        from item
+        where id = #{id}
+    </select>
+
+    <!--通过二级类目id查找单个-->
+    <select id="selectOneByICID" resultMap="realFied" parameterType="_int">
+        select * from item where category_id_two  = #{id}
+    </select>
+
+
+
+
+</mapper>

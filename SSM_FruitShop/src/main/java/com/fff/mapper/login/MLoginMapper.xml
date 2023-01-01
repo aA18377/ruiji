@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fff.mapper.login.MLoginMapper">
+    <sql id="sql_if">
+        <if test="id > 0">
+            and id = #{id}
+        </if>
+        <if test="userName != null">
+            and userName = #{userName}
+        </if>
+        <if test="passWord != null">
+            and passWord = #{passWord}
+        </if>
+        <if test="realName != null">
+            and realName = #{realName}
+        </if>
+    </sql>
+
+    <!--通过实例查询单个对象-->
+    <!--通过实例查询多个对象-->
+    <select id="findListByEntry" resultType="com.fff.pojo.Manage" parameterType="com.fff.pojo.Manage">
+        select * from ssm_fruit.manage where 1=1
+        <include refid="sql_if"/>
+    </select>
+
+
+
+</mapper>

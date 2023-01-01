@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fff.mapper.comment.CommentMapper">
+
+    <resultMap id="fied" type="com.fff.pojo.Comment">
+        <association property="user" column="user_id" javaType="com.fff.pojo.ItemOrder"
+                     select="select_user"/>
+    </resultMap>
+
+    <select id="select_user" resultType="com.fff.pojo.User">
+        select * from user where id = #{user_id}
+    </select>
+
+    <insert id="insertByEntry" parameterType="com.fff.pojo.Comment">
+        insert into comment(user_id, item_id, content, addTime)
+        values (#{userId},#{itemId},#{content},#{addTime})
+    </insert>
+</mapper>
