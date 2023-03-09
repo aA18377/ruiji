@@ -39,7 +39,7 @@ public class EmployeeController {
      */
     @GetMapping("/toLogin")
     public String toLogin() {
-        return "/backend/page/login/login";
+        return "backend/page/login/login";
     }
 
     /**

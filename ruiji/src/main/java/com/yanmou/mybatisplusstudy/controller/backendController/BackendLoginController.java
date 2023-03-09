@@ -23,7 +23,7 @@ public class BackendLoginController {
      */
     @GetMapping("/index.html")
     public String index(){
-        return "/backend/index";
+        return "backend/index";
     }
 
     /**

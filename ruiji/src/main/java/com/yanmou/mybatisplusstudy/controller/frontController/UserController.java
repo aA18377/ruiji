@@ -125,7 +125,7 @@ public class UserController {
      */
     @GetMapping("/index.html")
     public String index() {
-        return "/front/index";
+        return "front/index";
     }
 
     /**
@@ -141,7 +141,7 @@ public class UserController {
      */
     @GetMapping("/address.html")
     public String addressView() {
-        return "/front/page/address";
+        return "front/page/address";
     }
 
     /**
