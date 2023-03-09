@@ -127,5 +127,6 @@
     <orderEntry type="library" name="Maven: com.aliyun:aliyun-java-auth:0.1.8-beta" level="project" />
     <orderEntry type="library" name="Maven: org.ini4j:ini4j:0.5.4" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.68" level="project" />
+    <orderEntry type="library" name="Maven: com.google.collect:com.springsource.com.google.common.collect:0.8.0.20080820" level="project" />
   </component>
 </module>

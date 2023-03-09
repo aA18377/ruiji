@@ -81,6 +81,14 @@
             <artifactId>alibabacloud-dysmsapi20170525</artifactId>
             <version>2.0.22</version>
         </dependency>
+
+        <!--解决Linux中Maven的打包报错-->
+        <dependency>
+            <groupId>com.google.collect</groupId>
+            <artifactId>com.springsource.com.google.common.collect</artifactId>
+            <version>0.8.0.20080820</version>
+        </dependency>
+
     </dependencies>
 
 
