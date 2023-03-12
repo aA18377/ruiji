@@ -13,20 +13,21 @@ import com.yanmou.mybatisplusstudy.service.impl.CategoryServiceImpl;
 import com.yanmou.mybatisplusstudy.service.impl.DishFlavorImpl;
 import com.yanmou.mybatisplusstudy.service.impl.DishServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: zhaoss
@@ -46,6 +47,8 @@ public class DishController {
     private DishFlavorImpl dishFlavorService;
     @Value("${ruiji.basePath}")
     private String basePath;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 分页
@@ -174,6 +177,8 @@ public class DishController {
         List<DishFlavor> flavors = service.getUpdateData(id);
         dishDto.setFlavors(flavors);
         log.info("对象：" + dishDto);
+        String dishForRedis = "dish_"+dishDto.getCategoryId();
+        redisTemplate.delete(redisTemplate.keys(dishForRedis));
         return R.success(dishDto);
     }
 
@@ -199,43 +204,6 @@ public class DishController {
         return R.error(null);
     }
 
-    /**
-     * 菜品修改的废案 ----数轴
-     */
-//    @PutMapping
-//    @ResponseBody
-//    public R<String> addTodo1(@RequestBody DishDto dishDto) {
-//        UpdateWrapper<Dish> dishWrapper = new UpdateWrapper<>();
-//        dishWrapper.eq("id", dishDto.getId());
-//        boolean update = service.update(dishDto, dishWrapper);
-//        UpdateWrapper<DishFlavor> dishFlavorWrapper = new UpdateWrapper<>();
-//        int dishFlavorFlagCount = 0;
-//        String startTimeTmp = new Timestamp(System.currentTimeMillis()-5000).toString();
-//        String startTime = startTimeTmp.substring(0, startTimeTmp.lastIndexOf("."));
-//        //改不按顺序来
-//        String endTimeTmp = new Timestamp(System.currentTimeMillis()+5000).toString();
-//        String endtTime = endTimeTmp.substring(0, endTimeTmp.lastIndexOf("."));
-//        dishFlavorWrapper.eq("dish_id",dishDto.getId());
-//        log.info("开始时间："+startTime);
-//        log.info("结束时间："+endtTime);
-//        dishFlavorWrapper.notBetween("update_time",startTime,endtTime);
-//        List<DishFlavor> flavors = dishDto.getFlavors();
-//        for (DishFlavor flavor : flavors) {
-//            dishFlavorWrapper.set("name",flavor.getName());
-//            dishFlavorWrapper.set("value",flavor.getValue());
-//            //公共字段注入器失效
-//            dishFlavorWrapper.set("update_time",LocalDateTime.now());
-//            boolean update1 = dishFlavorService.update(dishFlavorWrapper);
-//            log.info("更新时间："+flavor.getUpdateTime());
-//            if (update1){
-//                dishFlavorFlagCount++;
-//            }
-//        }
-//        if (dishFlavorFlagCount == dishDto.getFlavors().size() && update) {
-//            return R.success(null);
-//        }
-//        return R.error(null);
-//    }
 
 
     /**
@@ -264,6 +232,8 @@ public class DishController {
             }
         }
         if (dishFlavorFlagCount == dishDto.getFlavors().size() && update) {
+            String dishForRedis = "dish_"+dishDto.getCategoryId();
+            redisTemplate.delete(redisTemplate.keys(dishForRedis));
             return R.success(null);
         }
 
@@ -272,55 +242,43 @@ public class DishController {
 
 
 
-    /**
-     * 套餐菜品选择   搜索功能
-     */
-//    @GetMapping("/list")
-//    @ResponseBody
-//    public R<List<Dish>> dishSetmeal(Long categoryId,String name) {
-//        log.info("name:"+name);
-//        QueryWrapper<Dish> wrapper = new QueryWrapper<>();
-//        wrapper.eq(categoryId != null,"category_id", categoryId);
-//        wrapper.like(name!=null,"name",name);
-//        List<Dish> list = service.list(wrapper);
-//        if (list.size() != 0) {
-//            return R.success(list);
-//        }
-//        return R.error(null);
-//    }
 
     /**
      * 套餐菜品选择
+     *
      * @param categoryId
      * @param name
      * @return
      */
     @GetMapping("/list")
     @ResponseBody
-    public R<List<DishDto>> dishSetmealTest(Long categoryId,String name) {
+    public R dishSetmealTest(Long categoryId, String name) {
+        String dishForRedis = "dish_"+categoryId;
+        ValueOperations operations = redisTemplate.opsForValue();
+        List<DishDto> dishList = (List<DishDto>)operations.get(dishForRedis);
+        if (dishList != null){
+            return R.success(dishList);
+        }
+
         QueryWrapper<Dish> wrapper = new QueryWrapper<>();
-        wrapper.eq(categoryId != null,"category_id", categoryId);
-        wrapper.like(name!=null,"name",name);
+        wrapper.eq(categoryId != null, "category_id", categoryId);
+        wrapper.like(name != null, "name", name);
         List<Dish> list = service.list(wrapper);
         List<DishDto> dtoList = new ArrayList<>();
         QueryWrapper<DishFlavor> queryWrapper = new QueryWrapper<>();
         for (Dish dish : list) {
             DishDto dishDto = new DishDto();
-            BeanUtils.copyProperties(dish,dishDto);
-            queryWrapper.eq("dish_id",dishDto.getId());
+            BeanUtils.copyProperties(dish, dishDto);
+            queryWrapper.eq("dish_id", dishDto.getId());
             List<DishFlavor> dishFlavorList = dishFlavorService.list(queryWrapper);
             dishDto.setFlavors(dishFlavorList);
             dtoList.add(dishDto);
             queryWrapper.clear();
         }
+
+        operations.set(dishForRedis,dtoList);
         return R.success(dtoList);
     }
 
 
-
-@Test
-    public void test(){
-    System.out.println(new Timestamp(System.currentTimeMillis()-5000));
-    System.out.println(new Timestamp(System.currentTimeMillis()));
-}
 }

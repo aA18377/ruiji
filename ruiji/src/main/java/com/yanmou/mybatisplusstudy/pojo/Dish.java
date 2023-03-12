@@ -6,9 +6,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+
 @Component
 @Data
-public class Dish {
+public class Dish implements Serializable {
+  private static final long serialVersionUID = 2L;
   @JsonFormat(shape = JsonFormat.Shape.STRING)
   @TableField
   private Long id;

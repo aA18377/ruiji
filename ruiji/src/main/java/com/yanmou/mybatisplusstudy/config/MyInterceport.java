@@ -21,7 +21,6 @@ public class MyInterceport implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         HttpSession session = request.getSession();
-        StringBuffer requestURL = request.getRequestURL();
 
 
         Employee loginUser = (Employee) session.getAttribute("loginUser");

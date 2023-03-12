@@ -6,6 +6,7 @@ import com.yanmou.mybatisplusstudy.pojo.Dish;
 import com.yanmou.mybatisplusstudy.pojo.DishFlavor;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,8 @@ import java.util.List;
  * @version: 1.0
  */
 @Data
-public class DishDto extends Dish {
+public class DishDto extends Dish implements Serializable {
+    private static final long serialVersionUID = 3L;
     @TableField(exist = false)
     private String categoryName;
     @TableField(exist = false)
