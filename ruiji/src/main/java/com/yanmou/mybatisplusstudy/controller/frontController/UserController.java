@@ -10,13 +10,17 @@ import com.yanmou.mybatisplusstudy.utils.CodeUtil;
 import com.yanmou.mybatisplusstudy.utils.SendSms;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Auther: zhaoss
@@ -31,12 +35,11 @@ import java.util.concurrent.ExecutionException;
 public class UserController {
     @Autowired
     private UserSeriveImpl userSerive;
-    @Autowired
-    private DishFlavorImpl dishFlavorService;
     //默认关闭
     @Value("${ruiji.msgEnable}")
     private boolean msgEnable;
-
+    @Autowired
+    private RedisTemplate<String,String> redisTemplate;
 
     /**
      * 登录页
@@ -51,7 +54,7 @@ public class UserController {
      */
     @PostMapping("/sendMsg")
     @ResponseBody
-    public R<String> sendMsg(@RequestBody User user, HttpSession session) {
+    public R<String> sendMsg(@RequestBody User user) {
         //手机号码
         String phone = user.getPhone();
         log.info("手机号码:" + phone);
@@ -69,7 +72,9 @@ public class UserController {
             }
             log.info("验证码:" + code);
             //保存验证码
-            session.setAttribute("phoneCode", code);
+            //session.setAttribute("phoneCode", code);
+            //将验证码存入redis，并设置过时时间为五分钟
+            redisTemplate.opsForValue().set(user.getPhone(),code,5L,TimeUnit.MINUTES);
             //放行
             return R.success("验证码已发送，请注意查收");
         }
@@ -84,14 +89,16 @@ public class UserController {
      */
     @PostMapping("/login")
     @ResponseBody
-    public R<String> loginTODO(@RequestBody Map<String, Object> map, HttpSession session) {
+    public R<String> loginTODO(@RequestBody Map<String, Object> map,HttpSession session) {
         //验证码是否正确
         String code = map.get("code").toString();
         String phone = map.get("phone").toString();
-        String phoneCode = session.getAttribute("phoneCode").toString();
+        //String phoneCode = session.getAttribute("phoneCode").toString();
+        String phoneCode = redisTemplate.opsForValue().get(phone);
         if (phoneCode != null && code.equals(phoneCode)) {
             //清除验证码
-            session.removeAttribute("phoneCode");
+            //session.removeAttribute("phoneCode");
+            redisTemplate.delete(redisTemplate.keys(phone));
             //数据库查询是否有该用户
             QueryWrapper<User> wrapper = new QueryWrapper<>();
             wrapper.eq("phone", phone);

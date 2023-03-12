@@ -1,4 +1,12 @@
 spring:
+  redis:
+    database: 0 #Redis中默认为我们提供了16个数据库，之间数据不互通，这里是选择要操作哪个数据库
+    port: 6379
+    jedis:
+      pool:
+        max-wait: 1ms
+    host: 8.130.69.246
+    password: 123456
   main:
     allow-circular-references: true
   datasource:
@@ -28,3 +36,4 @@ server:
 ruiji:
   basePath: D:\\testcommon\\
   msgEnable: false
+
