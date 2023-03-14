@@ -31,6 +31,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         Employee loginUser = (Employee) httpSession.getAttribute("loginUser");
         if (loginUser!=null){
             id = loginUser.getId();
+            return id;
         }
         User visitUser = (User) httpSession.getAttribute("visitUser");
         id = visitUser.getId();

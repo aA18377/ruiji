@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -182,60 +184,24 @@ public class DishController {
      */
     @ResponseBody
     @PostMapping
+    @CacheEvict(value = "dishCache",key = "'dish_'+#dishDto.categoryId")
     public R<String> addDish(@RequestBody DishDto dishDto) {
-        Long did = new DefaultIdentifierGenerator().nextId(dishDto);
-        dishDto.setId(did);
-        for (DishFlavor flavor : dishDto.getFlavors()) {
-            flavor.setId(new DefaultIdentifierGenerator().nextId(dishDto));
-            flavor.setDishId(did);
-        }
-        log.info("插入对象：" + dishDto);
         boolean dishSave = service.save(dishDto);
+        for (DishFlavor flavor : dishDto.getFlavors()) {
+            flavor.setDishId(dishDto.getId());
+        }
         //批量插入
         boolean flavorSava = dishFlavorService.saveBatch(dishDto.getFlavors());
+        if (dishDto.getFlavors()!=null && dishSave && flavorSava){
+            return R.success(null);
+        }
         if (dishSave && flavorSava) {
             return R.success(null);
         }
         return R.error(null);
     }
 
-    /**
-     * 菜品修改的废案 ----数轴
-     */
-//    @PutMapping
-//    @ResponseBody
-//    public R<String> addTodo1(@RequestBody DishDto dishDto) {
-//        UpdateWrapper<Dish> dishWrapper = new UpdateWrapper<>();
-//        dishWrapper.eq("id", dishDto.getId());
-//        boolean update = service.update(dishDto, dishWrapper);
-//        UpdateWrapper<DishFlavor> dishFlavorWrapper = new UpdateWrapper<>();
-//        int dishFlavorFlagCount = 0;
-//        String startTimeTmp = new Timestamp(System.currentTimeMillis()-5000).toString();
-//        String startTime = startTimeTmp.substring(0, startTimeTmp.lastIndexOf("."));
-//        //改不按顺序来
-//        String endTimeTmp = new Timestamp(System.currentTimeMillis()+5000).toString();
-//        String endtTime = endTimeTmp.substring(0, endTimeTmp.lastIndexOf("."));
-//        dishFlavorWrapper.eq("dish_id",dishDto.getId());
-//        log.info("开始时间："+startTime);
-//        log.info("结束时间："+endtTime);
-//        dishFlavorWrapper.notBetween("update_time",startTime,endtTime);
-//        List<DishFlavor> flavors = dishDto.getFlavors();
-//        for (DishFlavor flavor : flavors) {
-//            dishFlavorWrapper.set("name",flavor.getName());
-//            dishFlavorWrapper.set("value",flavor.getValue());
-//            //公共字段注入器失效
-//            dishFlavorWrapper.set("update_time",LocalDateTime.now());
-//            boolean update1 = dishFlavorService.update(dishFlavorWrapper);
-//            log.info("更新时间："+flavor.getUpdateTime());
-//            if (update1){
-//                dishFlavorFlagCount++;
-//            }
-//        }
-//        if (dishFlavorFlagCount == dishDto.getFlavors().size() && update) {
-//            return R.success(null);
-//        }
-//        return R.error(null);
-//    }
+
 
 
     /**
@@ -243,6 +209,7 @@ public class DishController {
      */
     @PutMapping
     @ResponseBody
+    @CacheEvict(value = "dishCache",key = "'dish_'+#dishDto.categoryId")
     public R<String> addTodo(@RequestBody DishDto dishDto) {
         UpdateWrapper<Dish> dishWrapper = new UpdateWrapper<>();
         dishWrapper.eq("id", dishDto.getId());
@@ -272,22 +239,6 @@ public class DishController {
 
 
 
-    /**
-     * 套餐菜品选择   搜索功能
-     */
-//    @GetMapping("/list")
-//    @ResponseBody
-//    public R<List<Dish>> dishSetmeal(Long categoryId,String name) {
-//        log.info("name:"+name);
-//        QueryWrapper<Dish> wrapper = new QueryWrapper<>();
-//        wrapper.eq(categoryId != null,"category_id", categoryId);
-//        wrapper.like(name!=null,"name",name);
-//        List<Dish> list = service.list(wrapper);
-//        if (list.size() != 0) {
-//            return R.success(list);
-//        }
-//        return R.error(null);
-//    }
 
     /**
      * 套餐菜品选择
@@ -297,6 +248,7 @@ public class DishController {
      */
     @GetMapping("/list")
     @ResponseBody
+    @Cacheable(value = "dishCache",key = "'dish_'+#categoryId",unless = "#result.code.equals(0)")
     public R<List<DishDto>> dishSetmealTest(Long categoryId,String name) {
         QueryWrapper<Dish> wrapper = new QueryWrapper<>();
         wrapper.eq(categoryId != null,"category_id", categoryId);

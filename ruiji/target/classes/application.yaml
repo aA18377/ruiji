@@ -1,4 +1,9 @@
 spring:
+  redis:
+    password: 123456
+    database: 0
+    host: 8.130.69.246
+    port: 6379
   main:
     allow-circular-references: true
   datasource:

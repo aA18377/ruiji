@@ -7,9 +7,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+
 @Component
 @Data
-public class Setmeal {
+public class Setmeal implements Serializable {
+  private static final long serialVersionUID = 87L;
   @JsonFormat(shape = JsonFormat.Shape.STRING)
   @TableId
   private Long id;

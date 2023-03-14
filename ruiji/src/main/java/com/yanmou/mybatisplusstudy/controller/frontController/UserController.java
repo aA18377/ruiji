@@ -11,12 +11,14 @@ import com.yanmou.mybatisplusstudy.utils.SendSms;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Auther: zhaoss
@@ -36,7 +38,8 @@ public class UserController {
     //默认关闭
     @Value("${ruiji.msgEnable}")
     private boolean msgEnable;
-
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 登录页
@@ -67,9 +70,9 @@ public class UserController {
                     e.printStackTrace();
                 }
             }
+            redisTemplate.opsForValue().set("loginCode",code,5, TimeUnit.MINUTES);
             log.info("验证码:" + code);
-            //保存验证码
-            session.setAttribute("phoneCode", code);
+
             //放行
             return R.success("验证码已发送，请注意查收");
         }
@@ -88,10 +91,13 @@ public class UserController {
         //验证码是否正确
         String code = map.get("code").toString();
         String phone = map.get("phone").toString();
-        String phoneCode = session.getAttribute("phoneCode").toString();
+        String phoneCode = (String) redisTemplate.opsForValue().get("loginCode");
+        if (phoneCode == null){
+            log.info("验证码没有正常缓存");
+        }
+
         if (phoneCode != null && code.equals(phoneCode)) {
-            //清除验证码
-            session.removeAttribute("phoneCode");
+
             //数据库查询是否有该用户
             QueryWrapper<User> wrapper = new QueryWrapper<>();
             wrapper.eq("phone", phone);

@@ -6,9 +6,13 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+
 @Data
 @Component
-public class DishFlavor {
+public class DishFlavor implements Serializable {
+  private static final long serialVersionUID = 22L;
   @JsonFormat(shape = JsonFormat.Shape.STRING)
   @TableId
   private Long id;

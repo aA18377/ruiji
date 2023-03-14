@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,6 +105,7 @@ public class SetmealController {
      */
     @PostMapping
     @ResponseBody
+    @CacheEvict(value = "setmealCache",key = "'setmeal_'+#setmealDto.categoryId")
     public R<String> addTODO(@RequestBody SetmealDto setmealDto) {
         Long setmealId = new DefaultIdentifierGenerator().nextId(setmealDto);
         setmealDto.setId(setmealId);
@@ -143,6 +146,7 @@ public class SetmealController {
      */
     @PutMapping
     @ResponseBody
+    @CacheEvict(value = "setmealCache",key = "'setmeal_'+#setmealDto.categoryId")
     public R<String> update(@RequestBody SetmealDto setmealDto){
         UpdateWrapper<Setmeal> setmealUpdateWrapper = new UpdateWrapper<>();
         setmealUpdateWrapper.eq("id",setmealDto.getId());
@@ -171,6 +175,7 @@ public class SetmealController {
      */
     @GetMapping("/list")
     @ResponseBody
+    @Cacheable(value = "setmealCache",key = "'setmeal_'+#setmeal.categoryId")
     public R<List<Setmeal>> list(Setmeal setmeal){
         QueryWrapper<Setmeal> wrapper = new QueryWrapper<>();
         wrapper.eq("Category_id",setmeal.getCategoryId());
